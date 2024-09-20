@@ -11,8 +11,6 @@ variables:
     value: true
   - name: skipComponentGovernanceDetection
     value: true
-  - name: NPM_REGISTRY
-    value: "none"
   - name: CARGO_REGISTRY
     value: "none"
   - name: VSCODE_CIBUILD
