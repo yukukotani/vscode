@@ -30,7 +30,6 @@ jobs:
       timeoutInMinutes: 30
       variables:
         VSCODE_ARCH: x64
-        NPM_REGISTRY: "https://pkgs.dev.azure.com/monacotools/Monaco/_packaging/vscode/npm/registry/"
       steps:
         - template: product-compile.yml@self
           parameters:
