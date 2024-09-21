@@ -45,6 +45,8 @@ steps:
       # Set the private NPM registry to the global npmrc file
       # so that authentication works for subfolders like build/, remote/, extensions/ etc
       # which does not have their own .npmrc file
+      echo "NPMRC Path: $(npm config get userconfig)"
+      echo "NPM Registry: $(npm config get registry)"
       npm config set registry "$NPM_REGISTRY"
       echo "##vso[task.setvariable variable=NPMRC_PATH]$(npm config get userconfig)"
     condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'), ne(variables['NPM_REGISTRY'], 'none'))
