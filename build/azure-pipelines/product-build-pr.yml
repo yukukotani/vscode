@@ -30,6 +30,7 @@ jobs:
       timeoutInMinutes: 30
       variables:
         VSCODE_ARCH: x64
+        NPM_REGISTRY: "none"
       steps:
         - template: product-compile.yml@self
           parameters:
