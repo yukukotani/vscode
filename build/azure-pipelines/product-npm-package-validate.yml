@@ -37,15 +37,6 @@ jobs:
             versionFilePath: .nvmrc
             nodejsMirror: https://github.com/joaomoreno/node-mirror/releases/download
 
-        # - template: ./distro/download-distro.yml@self
-
-        # - task: AzureKeyVault@2
-        #   displayName: "Azure Key Vault: Get Secrets"
-        #   inputs:
-        #     azureSubscription: "vscode-builds-subscription"
-        #     KeyVaultName: vscode-build-secrets
-        #     SecretsFilter: "github-distro-mixin-password"
-
         - script: node build/setup-npm-registry.js $NPM_REGISTRY
           condition: and(succeeded(), ne(variables['NPM_REGISTRY'], 'none'))
           displayName: Setup NPM Registry
@@ -89,3 +80,17 @@ jobs:
             GITHUB_TOKEN: "$(github-distro-mixin-password)"
           displayName: Install dependencies
           condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
+
+        - script: |
+            set -e
+
+            echo "Waiting for 1 hour before retrying..."
+            sleep 3600 # wait for 1 hour
+            npm ci --ignore-scripts
+          env:
+            ELECTRON_SKIP_BINARY_DOWNLOAD: 1
+            PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+            GITHUB_TOKEN: "$(github-distro-mixin-password)"
+          displayName: Retry npm install after failure
+          condition: failed()
+          retryCountOnTaskFailure: 5
