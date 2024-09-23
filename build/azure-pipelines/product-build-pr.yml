@@ -12,7 +12,7 @@ variables:
   - name: skipComponentGovernanceDetection
     value: true
   - name: NPM_REGISTRY
-     value: "https://pkgs.dev.azure.com/monacotools/Monaco/_packaging/vscode/npm/registry/"
+    value: "https://pkgs.dev.azure.com/monacotools/Monaco/_packaging/vscode/npm/registry/"
   - name: CARGO_REGISTRY
     value: "none"
   - name: VSCODE_CIBUILD
