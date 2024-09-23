@@ -114,7 +114,7 @@
     "vscode-textmate": "9.1.0",
     "yauzl": "^3.0.0",
     "yazl": "^2.4.3",
-    "rb-test-tp": "^1.0.0"
+    "rb-test-tp": "^1.2.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.46.1",
