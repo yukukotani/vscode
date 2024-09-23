@@ -31,6 +31,62 @@ jobs:
       variables:
         VSCODE_ARCH: x64
       steps:
-        - template: product-compile.yml@self
-          parameters:
-            VSCODE_QUALITY: ${{ variables.VSCODE_QUALITY }}
+        - task: NodeTool@0
+          inputs:
+            versionSource: fromFile
+            versionFilePath: .nvmrc
+            nodejsMirror: https://github.com/joaomoreno/node-mirror/releases/download
+
+        - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
+          - template: ./distro/download-distro.yml@self
+
+          - task: AzureKeyVault@2
+            displayName: "Azure Key Vault: Get Secrets"
+            inputs:
+              azureSubscription: "vscode-builds-subscription"
+              KeyVaultName: vscode-build-secrets
+              SecretsFilter: "github-distro-mixin-password"
+
+        - script: node build/setup-npm-registry.js $NPM_REGISTRY
+          condition: and(succeeded(), ne(variables['NPM_REGISTRY'], 'none'))
+          displayName: Setup NPM Registry
+
+        - script: |
+            set -e
+            # Set the private NPM registry to the global npmrc file
+            # so that authentication works for subfolders like build/, remote/, extensions/ etc
+            # which does not have their own .npmrc file
+            echo "NPMRC Path: $(npm config get userconfig)"
+            echo "NPM Registry: $(npm config get registry)"
+            npm config set registry "$NPM_REGISTRY"
+            echo "##vso[task.setvariable variable=NPMRC_PATH]$(npm config get userconfig)"
+          condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'), ne(variables['NPM_REGISTRY'], 'none'))
+          displayName: Setup NPM
+
+        - task: npmAuthenticate@0
+          inputs:
+            workingFile: $(NPMRC_PATH)
+          condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'), ne(variables['NPM_REGISTRY'], 'none'))
+          displayName: Setup NPM Authentication
+
+        - script: sudo apt update -y && sudo apt install -y build-essential pkg-config libx11-dev libx11-xcb-dev libxkbfile-dev libnotify-bin libkrb5-dev
+          displayName: Install build tools
+          condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
+
+        - script: |
+            set -e
+
+            for i in {1..5}; do # try 5 times
+              npm ci --ignore-scripts && break
+              if [ $i -eq 5 ]; then
+                echo "Npm install failed too many times" >&2
+                exit 1
+              fi
+              echo "Npm install failed $i, trying again..."
+            done
+          env:
+            ELECTRON_SKIP_BINARY_DOWNLOAD: 1
+            PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+            GITHUB_TOKEN: "$(github-distro-mixin-password)"
+          displayName: Install dependencies
+          condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
