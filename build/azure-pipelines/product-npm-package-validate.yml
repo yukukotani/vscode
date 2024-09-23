@@ -23,8 +23,10 @@ variables:
 jobs:
   - ${{ if ne(variables['VSCODE_CIBUILD'], true) }}:
     - job: Compile
-      displayName: Compile & Hygiene
-      pool: 1es-oss-ubuntu-22.04-x64
+      displayName: Compile
+      pool:
+        name: 1es-ubuntu-22.04-x64
+        os: linux
       timeoutInMinutes: 30
       variables:
         VSCODE_ARCH: x64
