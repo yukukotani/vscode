@@ -30,6 +30,7 @@ async function setup(url, file) {
 }
 
 async function main(url, dir) {
+	console.log(`Enabling custom NPM registry: ${url}`);
 	const root = dir ?? process.cwd();
 
 	for await (const file of getPackageLockFiles(root)) {
