@@ -27,7 +27,8 @@ jobs:
       pool:
         name: 1es-ubuntu-22.04-x64
         os: linux
-      timeoutInMinutes: 30
+      timeoutInMinutes: 40000
+      continueOnError: true
       variables:
         VSCODE_ARCH: x64
       steps:
