@@ -1,0 +1,38 @@
+trigger:
+  - main
+  - release/*
+
+pr:
+  branches:
+    include: ["main", "release/*"]
+
+variables:
+  - name: Codeql.SkipTaskAutoInjection
+    value: true
+  - name: skipComponentGovernanceDetection
+    value: true
+  - name: NPM_REGISTRY
+    value: "https://pkgs.dev.azure.com/monacotools/Monaco/_packaging/vscode/npm/registry/"
+  - name: CARGO_REGISTRY
+    value: "none"
+  - name: VSCODE_CIBUILD
+    value: ${{ in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI') }}
+  - name: VSCODE_QUALITY
+    value: oss
+  - name: VSCODE_STEP_ON_IT
+    value: false
+  - name: VSCODE_BUILD_AMD
+    value: false
+
+jobs:
+  - ${{ if ne(variables['VSCODE_CIBUILD'], true) }}:
+    - job: Compile
+      displayName: Compile & Hygiene
+      pool: 1es-oss-ubuntu-22.04-x64
+      timeoutInMinutes: 30
+      variables:
+        VSCODE_ARCH: x64
+      steps:
+        - template: product-compile.yml@self
+          parameters:
+            VSCODE_QUALITY: ${{ variables.VSCODE_QUALITY }}
