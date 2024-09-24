@@ -67,32 +67,26 @@ jobs:
         - script: |
             set -e
 
-            for i in {1..5}; do # try 5 times
-              npm ci --ignore-scripts && break
-              if [ $i -eq 5 ]; then
-                echo "Npm install failed too many times" >&2
-                exit 1
+            for attempt in {1..6}; do
+              if [ $attempt -gt 1 ]; then
+                echo "Attempt $attempt: Waiting for 1 hour before retrying..."
+                sleep 3600
               fi
-              echo "Npm install failed $i, trying again..."
+
+              echo "Attempt $attempt: Running npm ci"
+              if npm ci --ignore-scripts; then
+                echo "npm ci succeeded on attempt $attempt"
+                exit 0
+              else
+                echo "npm ci failed on attempt $attempt"
+              fi
             done
+
+            echo "npm ci failed after 6 attempts"
+            exit 1
           env:
             ELECTRON_SKIP_BINARY_DOWNLOAD: 1
             PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
             GITHUB_TOKEN: "$(github-distro-mixin-password)"
-          displayName: Install dependencies
-          continueOnError: true
-          condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
-
-        - script: |
-            set -e
-
-            echo "Waiting for 1 hour before retrying..."
-            sleep 3600 # wait for 1 hour
-            npm ci --ignore-scripts
-          env:
-            ELECTRON_SKIP_BINARY_DOWNLOAD: 1
-            PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
-            GITHUB_TOKEN: "$(github-distro-mixin-password)"
-          displayName: Retry npm install after failure
-          condition: failed()
-          retryCountOnTaskFailure: 5
+          displayName: Install dependencies with retries
+          timeoutInMinutes: 400
