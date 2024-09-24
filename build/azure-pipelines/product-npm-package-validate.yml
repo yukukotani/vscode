@@ -80,6 +80,7 @@ jobs:
             PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
             GITHUB_TOKEN: "$(github-distro-mixin-password)"
           displayName: Install dependencies
+          continueOnError: true
           condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
 
         - script: |
