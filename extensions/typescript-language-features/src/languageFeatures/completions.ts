@@ -506,7 +506,6 @@ class MyCompletionItem extends vscode.CompletionItem {
 		entry: Proto.CompletionEntry,
 		defaultCommitCharacters: readonly string[] | undefined,
 	): string[] | undefined {
-		// @ts-expect-error until TS 5.6
 		let commitCharacters = (entry.commitCharacters as string[] | undefined) ?? (defaultCommitCharacters ? Array.from(defaultCommitCharacters) : undefined);
 		if (commitCharacters) {
 			if (context.enableCallCompletions
@@ -781,7 +780,6 @@ class TypeScriptCompletionItemProvider implements vscode.CompletionItemProvider<
 		const isIncomplete = !!response.body.isIncomplete || (response.metadata as any)?.isIncomplete;
 		const entries = response.body.entries;
 		const metadata = response.metadata;
-		// @ts-expect-error until TS 5.6
 		const defaultCommitCharacters: readonly string[] | undefined = Object.freeze(response.body.defaultCommitCharacters);
 
 		if (response.body.optionalReplacementSpan) {
