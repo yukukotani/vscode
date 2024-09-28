@@ -682,7 +682,7 @@ namespace CompletionConfiguration {
 
 class TypeScriptCompletionItemProvider implements vscode.CompletionItemProvider<MyCompletionItem> {
 
-	public static readonly triggerCharacters = ['.', '"', '\'', '`', '/', '@', '<', '#', ' '];
+	public static readonly triggerCharacters = ['.', '"', '\'', '`', '/', '@', '<', '#', ' ', '>'];
 
 	constructor(
 		private readonly client: ITypeScriptServiceClient,
@@ -884,6 +884,10 @@ class TypeScriptCompletionItemProvider implements vscode.CompletionItemProvider<
 			case '/':
 			case '<': {
 				return context.triggerCharacter;
+			}
+			case '>': {
+				// TODO: update typescript dependency
+				return context.triggerCharacter as Proto.CompletionsTriggerCharacter;
 			}
 			default: {
 				return undefined;
